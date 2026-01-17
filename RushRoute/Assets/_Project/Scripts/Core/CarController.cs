@@ -40,27 +40,46 @@ namespace RushRoute.Core
             ApplyDrift();
         }
 
+        public void SetCarData(CarData newData)
+        {
+            carData = newData;
+        }
+
+        private float GetWeightModifier()
+        {
+            // If we are carrying a HEAVY package, we are slower
+            if (DeliveryManager.Instance != null && DeliveryManager.Instance.HasPackage)
+            {
+                var pkg = DeliveryManager.Instance.CurrentPackage;
+                if (pkg != null && pkg.Type == PackageType.Heavy)
+                {
+                    // Strength 2.0 = Half Speed. Strength 1.0 = Normal.
+                    return 1f / pkg.ModifierStrength;
+                }
+            }
+            return 1f;
+        }
+
         private void ApplyEngineForce()
         {
-            // Acceleration: Only add force if below max speed
-            // Dot product checks if we are already moving fast in the forward direction
-            float velocityDot = Vector2.Dot(transform.up, _rb.linearVelocity);
+            float weightMod = GetWeightModifier();
 
-            // Simple arcade acceleration
-            // Pressing W (y=1) -> Add force forward
-            // Pressing S (y=-1) -> Add force backward (Braking/Reversing)
+            float velocityDot = Vector2.Dot(transform.up, _rb.linearVelocity);
             float acceleration = _moveInput.y;
 
-            if (acceleration > 0 && velocityDot < carData.MaxSpeed)
+            // Apply Weight to Acceleration Limits
+            float currentMaxSpeed = carData.MaxSpeed * weightMod;
+
+            if (acceleration > 0 && velocityDot < currentMaxSpeed)
             {
-                _rb.AddForce(transform.up * acceleration * carData.Acceleration);
+                // Force is also reduced by weight
+                _rb.AddForce(transform.up * acceleration * carData.Acceleration * weightMod);
             }
-            else if (acceleration < 0 && velocityDot > -carData.MaxSpeed / 2) // Reverse is slower
+            else if (acceleration < 0 && velocityDot > -currentMaxSpeed / 2)
             {
-                _rb.AddForce(transform.up * acceleration * carData.Acceleration);
+                _rb.AddForce(transform.up * acceleration * carData.Acceleration * weightMod);
             }
 
-            // Drag: Apply linear drag if no input, so we roll to a stop
             if (acceleration == 0)
             {
                 _rb.linearDamping = carData.Drag;
@@ -73,17 +92,17 @@ namespace RushRoute.Core
 
         private void ApplySteering()
         {
-            // Don't turn if we aren't moving (Arcade feel)
             float minSpeedToTurn = 0.5f;
             if (_rb.linearVelocity.magnitude < minSpeedToTurn)
             {
-                _rb.angularVelocity = 0; // Stop spinning if we stop moving!
+                _rb.angularVelocity = 0;
                 return;
             }
 
-            // New Physics Steering: Directly set the Rotation Speed (Angular Velocity)
-            // This is snappier and stops spinning immediately when you let go.
-            float turnSpeed = -_moveInput.x * carData.TurnSpeed;
+            float weightMod = GetWeightModifier();
+            
+            // Turn speed reduced by weight too
+            float turnSpeed = -_moveInput.x * carData.TurnSpeed * weightMod;
             _rb.angularVelocity = turnSpeed;
         }
 
@@ -98,10 +117,26 @@ namespace RushRoute.Core
             // 1.0 = Train (Full grip, no slide)
             _rb.linearVelocity = forwardVelocity + (rightVelocity * carData.DriftFactor);
         }
-        
-        public void SetCarData(CarData newData)
+
+        private void OnCollisionEnter2D(Collision2D collision)
         {
-            carData = newData;
+            float impactSpeed = collision.relativeVelocity.magnitude;
+            
+            if (DeliveryManager.Instance != null && DeliveryManager.Instance.HasPackage)
+            {
+                var pkg = DeliveryManager.Instance.CurrentPackage;
+
+                if (pkg != null && pkg.Type == PackageType.Fragile)
+                {
+                    float breakThreshold = 5f; 
+                    if (impactSpeed > breakThreshold)
+                    {
+                        Debug.Log($"CRASH! Impact: {impactSpeed}. Package Destroyed!");
+                        DeliveryManager.Instance.ReportPackageBroken();
+                    }
+                }
+            }
         }
+        
     }
 }

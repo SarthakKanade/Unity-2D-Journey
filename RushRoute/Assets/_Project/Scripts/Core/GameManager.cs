@@ -24,6 +24,10 @@ namespace RushRoute.Core
 
         public event Action<GameState> OnGameStateChanged;
 
+        // --- Economy (Simple for Arc 1) ---
+        public int CurrentCash { get; private set; }
+        public event Action<int> OnCashChanged;
+
         private void Awake()
         {
             // Singleton Pattern: Ensure only one GameManager exists
@@ -57,6 +61,13 @@ namespace RushRoute.Core
         public void StartGame()
         {
             ChangeState(GameState.Playing);
+        }
+
+        public void AddCash(int amount)
+        {
+            CurrentCash += amount;
+            Debug.Log($"[GameManager] Cash Added: ${amount}. Total: ${CurrentCash}");
+            OnCashChanged?.Invoke(CurrentCash);
         }
     }
 }
