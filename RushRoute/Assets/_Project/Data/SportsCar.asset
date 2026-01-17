@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d04a531068374afda07b42a053bfed9, type: 3}
+  m_Name: SportsCar
+  m_EditorClassIdentifier: Assembly-CSharp::RushRoute.Core.CarData
+  MaxSpeed: 20
+  Acceleration: 10
+  Drag: 3
+  TurnSpeed: 200
+  DriftFactor: 0.9
+  TractionControl: 0.8
+  CarSprite: {fileID: 0}

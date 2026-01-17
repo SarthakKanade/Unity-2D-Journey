@@ -72,9 +72,7 @@ using UnityEngine.InputSystem.Utilities;
 /// }
 /// </code>
 /// </example>
-namespace RushRoute.Inputs
-{
-    public partial class @DeliveryInput: IInputActionCollection2, IDisposable
+public partial class @DeliveryInput: IInputActionCollection2, IDisposable
 {
     /// <summary>
     /// Provides access to the underlying asset instance.
@@ -449,5 +447,4 @@ namespace RushRoute.Inputs
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnNewaction1(InputAction.CallbackContext context);
     }
-}
 }
