@@ -58,14 +58,14 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5131841981443877688}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -125,8 +125,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b7682d4b30b71c4fa7ecf3886903ba8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
+  isPlayer: 0
+  scoreValue: 50
   health: 50
   hitParticles: {fileID: 6259134016805287202, guid: 4107cd27a9f11724793fdfef82e03c4b, type: 3}
+  applyCameraShake: 0
 --- !u!114 &-5685778949707014072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,6 +191,7 @@ MonoBehaviour:
   projectileSpeed: 10
   projectileLifetime: 5
   baseFireRate: 1
+  firingPoint: {fileID: 0}
   useAI: 1
   minimumFireRate: 0.5
   fireRateVariance: 0.4
@@ -226,6 +230,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1527739088751739779
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -271,6 +276,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 5389405659716800493, guid: d02743c37b5792a4f8dbce8b57569c76, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -280,5 +286,4 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
