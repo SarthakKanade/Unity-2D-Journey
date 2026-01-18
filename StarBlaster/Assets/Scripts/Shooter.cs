@@ -18,6 +18,14 @@ public class Shooter : MonoBehaviour
     Coroutine fireCoroutine;
     AudioManager audioManager;
 
+    HeatSystem heatSystem;
+
+    void Awake()
+    {
+        // Professional Practice: Get dependency in Awake
+        heatSystem = GetComponent<HeatSystem>();
+    }
+
     void Start()
     {
         audioManager = FindFirstObjectByType<AudioManager>();
@@ -50,6 +58,18 @@ public class Shooter : MonoBehaviour
     {
         while (true)
         {
+            // NEW: Check Heat System before firing
+            // If we have a HeatSystem and it fails to fire (overheated), we wait.
+            if (heatSystem != null)
+            {
+                if (!heatSystem.TryFire()) 
+                {
+                    // If failed to fire due to overheat, we just yield and try again next frame/loop
+                    yield return null; 
+                    continue;
+                }
+            }
+
             GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
 
             projectile.transform.rotation = transform.rotation;

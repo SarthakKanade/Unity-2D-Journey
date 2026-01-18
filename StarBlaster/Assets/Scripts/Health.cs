@@ -5,6 +5,7 @@ public class Health : MonoBehaviour
     [SerializeField] bool isPlayer;
     [SerializeField] int scoreValue = 50;
     [SerializeField] int health = 50;
+    int maxHealth; // NEW: Track max health for percentage bars
     [SerializeField] ParticleSystem hitParticles;
 
     [SerializeField] bool applyCameraShake;
@@ -12,6 +13,11 @@ public class Health : MonoBehaviour
     AudioManager audioManager;
     ScoreKeeper scoreKeeper;
     LevelManager levelManager;
+
+    void Awake()
+    {
+        maxHealth = health;
+    }
 
     void Start()
     {
@@ -73,5 +79,10 @@ public class Health : MonoBehaviour
     public int GetHealth()
     {
         return health;
+    }
+
+    public float GetHealthPercentage()
+    {
+        return (float)health / maxHealth;
     }
 }

@@ -1,37 +1,63 @@
-using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Movement Settings")]
     [SerializeField] float moveSpeed = 10f;
-    [SerializeField] float leftBoundPadding;
-    [SerializeField] float rightBoundPadding;
-    [SerializeField] float upBoundPadding;
-    [SerializeField] float downBoundPadding;
+    [SerializeField] float padding = 0.5f;
 
+    [Header("Components")]
+    [SerializeField] Rigidbody2D rb;
     Shooter playerShooter;
-    InputAction moveAction;
-    InputAction fireAction;
 
-    Vector3 moveVector;
+    // Input Actions (Professional Class Way)
+    GameInput gameInput;
+    
+    // State Variables
+    Vector2 moveInput;
     Vector2 minBounds;
     Vector2 maxBounds;
+    Vector2 mousePosition;
+
+    void Awake()
+    {
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
+        playerShooter = GetComponent<Shooter>();
+
+        // Initialize the generated Input Class
+        gameInput = new GameInput();
+    }
+
+    void OnEnable()
+    {
+        // Professional Practice: Enable input when the object is enabled.
+        gameInput.Player.Enable();
+    }
+
+    void OnDisable()
+    {
+        // Professional Practice: Disable input when the object is disabled (e.g. death, pause).
+        gameInput.Player.Disable();
+    }
 
     void Start()
     {
-        playerShooter = GetComponent<Shooter>();
-
-        moveAction = InputSystem.actions.FindAction("Move");
-        fireAction = InputSystem.actions.FindAction("Fire");
-
         InitBounds();
     }
 
     void Update()
     {
-        MovePlayer();
+        ProcessInput();
         FireShooter();
+    }
+
+    void FixedUpdate()
+    {
+        ProcessMovement();
+        ProcessRotation();
     }
 
     void InitBounds()
@@ -41,19 +67,40 @@ public class PlayerController : MonoBehaviour
         maxBounds = mainCamera.ViewportToWorldPoint(new Vector2(1, 1));
     }
 
-    void MovePlayer()
+    void ProcessInput()
     {
-        moveVector = moveAction.ReadValue<Vector2>();
-        Vector3 newPos = transform.position + moveVector * moveSpeed * Time.deltaTime;
+        // Read values directly from the Class
+        moveInput = gameInput.Player.Move.ReadValue<Vector2>();
+        
+        mousePosition = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+    }
 
-        newPos.x = Math.Clamp(newPos.x, minBounds.x + leftBoundPadding, maxBounds.x - rightBoundPadding);
-        newPos.y = Math.Clamp(newPos.y, minBounds.y + downBoundPadding, maxBounds.y - upBoundPadding);
+    void ProcessMovement()
+    {
+        Vector2 currentPos = rb.position;
+        Vector2 displacement = moveInput * moveSpeed * Time.fixedDeltaTime;
+        
+        Vector2 targetPos = currentPos + displacement;
 
-        transform.position = newPos;
+        targetPos.x = Mathf.Clamp(targetPos.x, minBounds.x + padding, maxBounds.x - padding);
+        targetPos.y = Mathf.Clamp(targetPos.y, minBounds.y + padding, maxBounds.y - padding);
+
+        rb.MovePosition(targetPos);
+    }
+
+    void ProcessRotation()
+    {
+        Vector2 lookDir = mousePosition - rb.position;
+        float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg - 90f;
+        rb.rotation = angle;
     }
 
     void FireShooter()
     {
-        playerShooter.isFiring = fireAction.IsPressed();
+        if(playerShooter != null)
+        {
+            // Read button state directly from the Class
+            playerShooter.isFiring = gameInput.Player.Fire.IsPressed();
+        }
     }
 }
