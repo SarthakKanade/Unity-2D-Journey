@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abc5d14bd5897451ea15d180b048bdcc, type: 3}
   m_Name: PizzaBox
   m_EditorClassIdentifier: Assembly-CSharp::RushRoute.Core.PackageData
-  PackageName: Pizza Box
+  PackageName: PizzaBox
   Description: 'chicken Pizza '
   Icon: {fileID: 0}
   Payout: 50

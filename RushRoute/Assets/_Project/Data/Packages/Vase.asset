@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abc5d14bd5897451ea15d180b048bdcc, type: 3}
   m_Name: Vase
   m_EditorClassIdentifier: Assembly-CSharp::RushRoute.Core.PackageData
-  PackageName: Grandma's Vase
+  PackageName: Vase
   Description: Beloved Antique vase of grandma
   Icon: {fileID: 0}
-  Payout: 50
+  Payout: 200
   TimeToDeliver: 30
   Type: 1
   ModifierStrength: 1
