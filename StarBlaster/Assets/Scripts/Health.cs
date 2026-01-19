@@ -4,7 +4,7 @@ public class Health : MonoBehaviour
 {
     [SerializeField] bool isPlayer;
     [SerializeField] int scoreValue = 50;
-    [SerializeField] int health = 50;
+    [SerializeField] int health = 100;
     int maxHealth; // NEW: Track max health for percentage bars
     [SerializeField] ParticleSystem hitParticles;
 
@@ -79,6 +79,13 @@ public class Health : MonoBehaviour
     public int GetHealth()
     {
         return health;
+    }
+
+    // NEW: Allow initialization from SO
+    public void SetMaxHealth(int amount)
+    {
+        health = amount;
+        maxHealth = amount;
     }
 
     public float GetHealthPercentage()

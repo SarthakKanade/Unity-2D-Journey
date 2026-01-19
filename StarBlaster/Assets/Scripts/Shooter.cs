@@ -7,29 +7,43 @@ public class Shooter : MonoBehaviour
     [SerializeField] GameObject projectilePrefab;
     [SerializeField] float projectileSpeed = 10f;
     [SerializeField] float projectileLifetime = 5f;
-    [SerializeField] float baseFireRate = 0.2f;
+    [SerializeField] float baseFireRate = 0.15f;
+    [SerializeField] int defaultDamage = 12; // BASE damage for Player or default enemies
 
     [Header("AI Variables")]
-    [SerializeField] bool useAI;
+    [SerializeField] public bool useAI; 
     [SerializeField] float minimumFireRate = 0.2f;
     [SerializeField] float fireRateVariance = 0f;
 
     [HideInInspector] public bool isFiring;
     Coroutine fireCoroutine;
     AudioManager audioManager;
-
     HeatSystem heatSystem;
+
+    // Runtime variables (can be overridden by SO)
+    int currentDamage;
 
     void Awake()
     {
-        // Professional Practice: Get dependency in Awake
         heatSystem = GetComponent<HeatSystem>();
+        currentDamage = defaultDamage; // Start with default
+    }
+
+    // NEW: Called by Enemy.cs to inject stats from SO
+    public void InitializeWeapon(GameObject prefab, float speed, int damage, float fireRate)
+    {
+        this.projectilePrefab = prefab;
+        this.projectileSpeed = speed;
+        this.currentDamage = damage;
+        this.baseFireRate = fireRate;
     }
 
     void Start()
     {
         audioManager = FindFirstObjectByType<AudioManager>();
 
+        // If useAI is checked in inspector, we start firing immediately.
+        // Enemy.cs will TURN THIS OFF if it wants to control it manually.
         if (useAI)
         {
             isFiring = true;
@@ -45,10 +59,12 @@ public class Shooter : MonoBehaviour
     {
         if (isFiring && fireCoroutine == null)
         {
+            // Debug.Log($"{name} starting fire coroutine.");
             fireCoroutine = StartCoroutine(FireContinuously());
         }
         else if (!isFiring && fireCoroutine != null)
         {
+            // Debug.Log($"{name} stopping fire coroutine.");
             StopCoroutine(fireCoroutine);
             fireCoroutine = null;
         }
@@ -58,13 +74,10 @@ public class Shooter : MonoBehaviour
     {
         while (true)
         {
-            // NEW: Check Heat System before firing
-            // If we have a HeatSystem and it fails to fire (overheated), we wait.
             if (heatSystem != null)
             {
                 if (!heatSystem.TryFire()) 
                 {
-                    // If failed to fire due to overheat, we just yield and try again next frame/loop
                     yield return null; 
                     continue;
                 }
@@ -75,7 +88,17 @@ public class Shooter : MonoBehaviour
             projectile.transform.rotation = transform.rotation;
 
             Rigidbody2D projectileRB = projectile.GetComponent<Rigidbody2D>();
-            projectileRB.linearVelocity = transform.up * projectileSpeed;
+            if (projectileRB != null)
+            {
+                projectileRB.linearVelocity = transform.up * projectileSpeed;
+            }
+
+            // NEW: Apply Damage from Config
+            DamageDealer damageDealer = projectile.GetComponent<DamageDealer>();
+            if (damageDealer != null)
+            {
+                damageDealer.SetDamage(currentDamage);
+            }
 
             Destroy(projectile, projectileLifetime);
 

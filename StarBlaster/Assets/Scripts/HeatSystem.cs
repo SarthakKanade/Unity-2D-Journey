@@ -6,8 +6,8 @@ public class HeatSystem : MonoBehaviour
 {
     [Header("Heat Settings")]
     [SerializeField] float maxHeat = 100f;
-    [SerializeField] float heatGainPerShot = 4f; // User Req: 4
-    [SerializeField] float coolingRate = 10f;    // User Req: 10
+    [SerializeField] float heatGainPerShot = 3f; // User Req: 3
+    [SerializeField] float coolingRate = 12f;    // User Req: 12
     [SerializeField] float cooldownDelay = 0.5f; // Time before cooling starts after shooting
     
     [Tooltip("How long to disable weapons after hitting 100% heat")]

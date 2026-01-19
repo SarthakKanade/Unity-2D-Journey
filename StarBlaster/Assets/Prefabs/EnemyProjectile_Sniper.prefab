@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1231286810369676082}
   - component: {fileID: 3423480617818589496}
   m_Layer: 7
-  m_Name: Enemy Projectile
+  m_Name: EnemyProjectile_Sniper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -96,8 +96,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.27}
-  m_Size: {x: 0.35, y: 0.5}
+  m_Offset: {x: 0, y: 0}
+  m_Size: {x: 0.3, y: 0.75}
   m_Direction: 0
 --- !u!114 &3423480617818589496
 MonoBehaviour:
@@ -146,6 +146,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
 --- !u!212 &6358156812432489297
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -191,7 +192,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -427387334052958078, guid: ac2cfcd515639ce4cbd0fa6c189d8b3c, type: 3}
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: -671733749866001778, guid: 5639b3cb065f8d54ca2de81cc8ed01be, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -200,5 +202,4 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0

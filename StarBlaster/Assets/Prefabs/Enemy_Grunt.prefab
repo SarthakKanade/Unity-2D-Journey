@@ -9,13 +9,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8280744814558069386}
-  - component: {fileID: 3245444379702447404}
   - component: {fileID: 3350334424650713786}
   - component: {fileID: -9180091058655759850}
   - component: {fileID: 564132424389817684}
   - component: {fileID: -5685778949707014072}
+  - component: {fileID: 5716306176744555224}
   m_Layer: 7
-  m_Name: Enemy
+  m_Name: Enemy_Grunt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29,27 +29,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5131841981443877688}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 5988403107230542878}
   - {fileID: 6851143078374908433}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3245444379702447404
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5131841981443877688}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 258a44a3d10f1f1488dd612195d5f51a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Pathfinding
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
 --- !u!50 &3350334424650713786
 Rigidbody2D:
   serializedVersion: 5
@@ -112,7 +100,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.6
+  m_Radius: 0.4
 --- !u!114 &564132424389817684
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,7 +130,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe9625255f579744bbad8600816df3c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamageDealer
-  damage: 25
+--- !u!114 &5716306176744555224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5131841981443877688}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6867e053c57984fac87e6c2ef3b859f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyGrunt
+  stats: {fileID: 11400000, guid: ed0cfdd6dc87340458201c76b391fb18, type: 2}
+  moveSpeed: 5
+  scoreValue: 100
+  driftDurationMin: 3.5
+  driftDurationMax: 4.5
+  driftSpeed: 2
+  advanceSpeed: 3
 --- !u!1 &5841417795466582164
 GameObject:
   m_ObjectHideFlags: 0
@@ -152,7 +158,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6851143078374908433}
-  - component: {fileID: 8855858497119968811}
+  - component: {fileID: 4137121848796226840}
   m_Layer: 0
   m_Name: Shooter
   m_TagString: Untagged
@@ -168,14 +174,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5841417795466582164}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.227, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8280744814558069386}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
---- !u!114 &8855858497119968811
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4137121848796226840
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -187,14 +193,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae9a87e10e6279b4e83a4a8163d8a213, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Shooter
-  projectilePrefab: {fileID: 2783788306037018308, guid: 25df6e471c8e7f24380294cc98170e3e, type: 3}
-  projectileSpeed: 10
-  projectileLifetime: 5
-  baseFireRate: 1
-  firingPoint: {fileID: 0}
-  useAI: 1
-  minimumFireRate: 0.5
-  fireRateVariance: 0.4
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 0
+  firingRate: 0
+  damage: 0
   isFiring: 0
 --- !u!1 &7175221288556189983
 GameObject:
@@ -223,8 +225,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 8280744814558069386}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

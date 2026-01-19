@@ -62,9 +62,19 @@ public class PlayerController : MonoBehaviour
 
     void InitBounds()
     {
-        Camera mainCamera = Camera.main;
-        minBounds = mainCamera.ViewportToWorldPoint(new Vector2(0, 0));
-        maxBounds = mainCamera.ViewportToWorldPoint(new Vector2(1, 1));
+        // Refactor: Use Central GameArea
+        if (GameArea.Instance != null)
+        {
+            minBounds = new Vector2(GameArea.Instance.MinBounds.x, GameArea.Instance.PlayerMinY);
+            maxBounds = new Vector2(GameArea.Instance.MaxBounds.x, GameArea.Instance.FrontlineY); // Use FrontlineY as Player Top Limit
+        }
+        else
+        {
+            // Fallback if GameArea missing
+            Camera mainCamera = Camera.main;
+            minBounds = mainCamera.ViewportToWorldPoint(new Vector2(0, 0));
+            maxBounds = mainCamera.ViewportToWorldPoint(new Vector2(1, 1));
+        }
     }
 
     void ProcessInput()
