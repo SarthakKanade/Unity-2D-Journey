@@ -11,38 +11,19 @@ public class EnemySpawner : MonoBehaviour
 
     void Start()
     {
-        if (spawnPoints.Length > 0 && enemyPrefabs.Length > 0)
-        {
-            StartCoroutine(SpawnEnemies());
-        }
-        else
-        {
-            Debug.LogWarning("EnemySpawner missing Prefabs or SpawnPoints!");
-        }
+        // Manager Controlled - No auto start
     }
 
-    IEnumerator SpawnEnemies()
+    public void SpawnSpecificEnemy(GameObject enemyPrefab)
     {
-        // Initial delay
-        yield return new WaitForSeconds(1f);
+        if (enemyPrefab == null) return;
 
-        do
-        {
-            // 1. Pick Random Enemy
-            int enemyIndex = Random.Range(0, enemyPrefabs.Length);
-            GameObject enemyToSpawn = enemyPrefabs[enemyIndex];
+        // 2. Pick Random Spawn Point (Off-screen)
+        int spawnIndex = Random.Range(0, spawnPoints.Length);
+        Transform point = spawnPoints[spawnIndex];
 
-            // 2. Pick Random Spawn Point (Off-screen)
-            int spawnIndex = Random.Range(0, spawnPoints.Length);
-            Transform point = spawnPoints[spawnIndex];
-
-            // 3. Spawn
-            GameObject newEnemy = Instantiate(enemyToSpawn, point.position, Quaternion.Euler(0, 0, 180));
-            newEnemy.transform.SetParent(transform);
-
-            // 4. Wait
-            yield return new WaitForSeconds(spawnRate);
-
-        } while (isLooping);
+        // 3. Spawn
+        GameObject newEnemy = Instantiate(enemyPrefab, point.position, Quaternion.Euler(0, 0, 180));
+        newEnemy.transform.SetParent(transform);
     }
 }

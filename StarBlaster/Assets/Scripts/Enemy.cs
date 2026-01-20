@@ -12,6 +12,21 @@ public enum EnemyState
 
 public abstract class Enemy : MonoBehaviour
 {
+    public static System.Action<Enemy> OnEnemyDeath;
+
+    // Existing fields...
+
+    // ...
+
+    void OnDestroy()
+    {
+       // Notify Manager
+       OnEnemyDeath?.Invoke(this); 
+    }
+
+
+
+
     [Header("Enemy Stats")]
     [SerializeField] protected EnemyStatsSO stats;
 
@@ -141,9 +156,16 @@ public abstract class Enemy : MonoBehaviour
     protected virtual void HandlePathComplete()
     {
         // Transition from Entrance to Default Combat State
-        // Grunts/Bombers -> Drift, Snipers -> Cooldown/Aim? 
-        // Let's default to Drift, subclass can intercept via OnStateEnter if needed.
         ChangeState(EnemyState.Drift); 
+    }
+
+    // NEW: Cleanup Phase Aggression
+    public virtual void EnableDangerMode()
+    {
+        // Base behavior: Just move faster?
+        // Specifics: Subclasses should override this.
+        // e.g., Grunt: ChangeState(EnemyState.Attack) -> Rush Player
+        moveSpeed *= 1.5f;
     }
     
     // Common Helper Methods

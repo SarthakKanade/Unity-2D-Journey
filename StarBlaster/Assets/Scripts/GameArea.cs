@@ -61,7 +61,7 @@ public class GameArea : MonoBehaviour
         // Midline is next 40%? Or specific?
         // Let's just split the remaining space evenly for Mid/Front
         // Frontline Top / Mid Bottom
-        MidlineY = MaxBounds.y - (enemyZoneHeight * 0.60f);  
+        MidlineY = MaxBounds.y - (enemyZoneHeight * 0.75f);  
         
         Debug.Log($"Bounds: Top({MaxBounds.y}) | Back({BacklineY}) | Mid({MidlineY}) | Front/PlayerTop({FrontlineY}) | PlayerBot/UITop({PlayerMinY})");
     }
@@ -110,7 +110,7 @@ public class GameArea : MonoBehaviour
 
         // Enemy Lanes (Red)
         float eH = h * 0.45f;
-        float midLine = max.y - (eH * 0.60f);
+        float midLine = max.y - (eH * 0.75f);
         float backLine = max.y - (eH * 0.20f);
 
         Gizmos.color = Color.yellow; // Mid/Front Split

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3974fd0b402746ba91ab0aeddf65d50, type: 3}
+  m_Name: Range_15_19
+  m_EditorClassIdentifier: Assembly-CSharp::WaveRangeConfigSO
+  minWave: 15
+  maxWave: 19
+  quotaMultiplier: 1.25
+  maxEnemiesOnScreen: 12
+  spawnIntervalMin: 1.2
+  spawnIntervalMax: 1.6
+  enemyWeights:
+  - enemyPrefab: {fileID: 5131841981443877688, guid: d9cac06cca1635a42a746f86d9bf56ea, type: 3}
+    weight: 40
+  - enemyPrefab: {fileID: 5131841981443877688, guid: e0e8f7c9e95364c5b8e83e3a5f2aeedd, type: 3}
+    weight: 25
+  - enemyPrefab: {fileID: 5131841981443877688, guid: e291f8d814c3d4bc7acf481138729438, type: 3}
+    weight: 20
+  - enemyPrefab: {fileID: 5131841981443877688, guid: 679478c657df341b79f762a21e3b6145, type: 3}
+    weight: 15
