@@ -22,6 +22,10 @@ public class Shooter : MonoBehaviour
 
     // Runtime variables (can be overridden by SO)
     int currentDamage;
+    
+    // Perk Modifiers
+    public float damageMultiplier = 1f;
+    public float fireRateMultiplier = 1f; // Higher is faster (WaitTime / Multiplier)
 
     void Awake()
     {
@@ -93,16 +97,20 @@ public class Shooter : MonoBehaviour
                 projectileRB.linearVelocity = transform.up * projectileSpeed;
             }
 
-            // NEW: Apply Damage from Config
+            // NEW: Apply Damage from Config + Perks
             DamageDealer damageDealer = projectile.GetComponent<DamageDealer>();
             if (damageDealer != null)
             {
-                damageDealer.SetDamage(currentDamage);
+                int finalDamage = Mathf.RoundToInt(currentDamage * damageMultiplier);
+                damageDealer.SetDamage(finalDamage);
             }
 
             Destroy(projectile, projectileLifetime);
 
             float waitTime = Random.Range(baseFireRate - fireRateVariance, baseFireRate + fireRateVariance);
+            // Apply Perk Multiplier (Higher multiplier = Lower wait time)
+            if (fireRateMultiplier > 0) waitTime /= fireRateMultiplier;
+            
             waitTime = Mathf.Clamp(waitTime, minimumFireRate, float.MaxValue);
 
             audioManager.PlayShootingSFX();

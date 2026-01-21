@@ -88,6 +88,19 @@ public class Health : MonoBehaviour
         maxHealth = amount;
     }
 
+    public void IncreaseMaxHealth(int amount)
+    {
+        maxHealth += amount;
+        health += amount; // Also heal the amount added? Usually yes for upgrades.
+    }
+
+    public void HealPercent(float percent)
+    {
+        int healAmount = Mathf.RoundToInt(maxHealth * percent);
+        health += healAmount;
+        health = Mathf.Min(health, maxHealth);
+    }
+
     public float GetHealthPercentage()
     {
         return (float)health / maxHealth;

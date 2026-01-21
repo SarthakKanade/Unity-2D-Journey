@@ -209,9 +209,25 @@ public class WaveManager : MonoBehaviour
         SetState(WaveState.WaveComplete);
         Debug.Log("Wave Complete!");
         
-        // Validation: Heal Player, Show UI, etc. (Later)
-        
+        PerkManager.Instance.HandleWaveComplete(); // Trigger OnWaveEnd perks
+
         yield return new WaitForSeconds(waveBreakTime);
+
+        // Find and Show UI (Include inactive because the panel is likely hidden)
+        PerkSelectionUI selectionUI = FindFirstObjectByType<PerkSelectionUI>(FindObjectsInactive.Include);
+        if (selectionUI != null)
+        {
+            selectionUI.Show(); // This will pause the game
+        }
+        else
+        {
+            Debug.LogWarning("No PerkSelectionUI found! Skipping perk selection.");
+            StartNextWave();
+        }
+    }
+
+    public void StartNextWave()
+    {
         StartWave(currentWaveIndex + 1);
     }
 

@@ -17,6 +17,13 @@ public class HeatSystem : MonoBehaviour
     public float CurrentHeat { get; private set; }
     public bool IsOverheated { get; private set; }
     
+    // Perk Modifiers
+    public float coolingMultiplier = 1f;
+    public float heatGainMultiplier = 1f;
+    public float maxHeatBonus = 0f;
+    public float overheatDurationReduction = 0f;
+    public bool allowOverdrive = false; // Epic Perk
+
     float lastFireTime;
 
     // Events
@@ -37,7 +44,9 @@ public class HeatSystem : MonoBehaviour
         {
             if (CurrentHeat > 0)
             {
-                CurrentHeat -= coolingRate * Time.deltaTime;
+                // PERK: Apply Multiplier
+                float effectiveCooling = coolingRate * coolingMultiplier;
+                CurrentHeat -= effectiveCooling * Time.deltaTime;
                 CurrentHeat = Mathf.Max(CurrentHeat, 0);
             }
         }
@@ -45,7 +54,8 @@ public class HeatSystem : MonoBehaviour
 
     public bool TryFire()
     {
-        if (IsOverheated) return false;
+        // PERK: Overdrive Core allows firing while overheated (at health cost, handled in Shooter)
+        if (IsOverheated && !allowOverdrive) return false;
 
         AddHeat();
         return true;
@@ -54,11 +64,21 @@ public class HeatSystem : MonoBehaviour
     void AddHeat()
     {
         lastFireTime = Time.time; // Reset cooldown timer
-        CurrentHeat += heatGainPerShot;
+        
+        // PERK: Apply Multiplier
+        float effectiveHeat = heatGainPerShot * heatGainMultiplier;
+        
+        // PERK: Overdrive logic (Don't add heat if already maxed, just stay maxed)
+        if (IsOverheated && allowOverdrive) return;
 
-        if (CurrentHeat >= maxHeat)
+        CurrentHeat += effectiveHeat;
+
+        // PERK: Max Heat Bonus
+        float actualMaxHeat = maxHeat + maxHeatBonus;
+
+        if (CurrentHeat >= actualMaxHeat)
         {
-            CurrentHeat = maxHeat;
+            CurrentHeat = actualMaxHeat;
             StartCoroutine(OverheatRoutine());
         }
     }
@@ -68,12 +88,11 @@ public class HeatSystem : MonoBehaviour
         IsOverheated = true;
         OnOverheat?.Invoke(); // UI Flash
 
-        // User Req: "Shooting stops for 2 seconds"
-        // And implied: No cooling during this time (ProcessCooling checks IsOverheated)
-        yield return new WaitForSeconds(overheatDuration);
+        // PERK: Reduce duration
+        float actualDuration = Mathf.Max(0.5f, overheatDuration - overheatDurationReduction);
 
-        // User Req: "Starts lowering again... does not directly go to zero"
-        // So we just unlock the gun. ProcessCooling will kick in next frame (since Time > lastFireTime).
+        yield return new WaitForSeconds(actualDuration);
+
         IsOverheated = false;
         OnCooled?.Invoke();
     }
@@ -82,5 +101,11 @@ public class HeatSystem : MonoBehaviour
     public float GetHeatPercentage()
     {
         return CurrentHeat / maxHeat;
+    }
+
+    public void ReduceHeatPercent(float percent)
+    {
+        CurrentHeat -= maxHeat * percent;
+        CurrentHeat = Mathf.Max(0, CurrentHeat);
     }
 }
