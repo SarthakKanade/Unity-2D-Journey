@@ -11,10 +11,17 @@ public class WaveManager : MonoBehaviour
     [SerializeField] List<WaveRangeConfigSO> rangeConfigs;
     [SerializeField] float initialWaveDelay = 2.0f;
     [SerializeField] float waveBreakTime = 3.0f;
+    [SerializeField] int startingWave = 1; // NEW: Easy testing!
 
+    [Header("Boss Settings")]
+    [SerializeField] GameObject bossPrefab;
+    [SerializeField] int bossWaveNumber = 10;
+    
     [Header("Debug / Read-Only")]
     [SerializeField] int currentWaveIndex = 1;
     [SerializeField] WaveState currentState = WaveState.WaitingToStart;
+    [SerializeField] bool isBossWave = false; 
+
     [SerializeField] int currentQuota;
     [SerializeField] int spawnedCount;
     [SerializeField] int killedCount;
@@ -35,6 +42,7 @@ public class WaveManager : MonoBehaviour
     {
         WaitingToStart,
         Spawning,
+        BossBattle, // NEW
         Cleanup,
         WaveComplete,
         GameOver
@@ -73,7 +81,7 @@ public class WaveManager : MonoBehaviour
     IEnumerator StartFirstWaveRoutine()
     {
         yield return new WaitForSeconds(initialWaveDelay);
-        StartWave(1);
+        StartWave(startingWave);
     }
 
     void Update()
@@ -92,7 +100,16 @@ public class WaveManager : MonoBehaviour
     void StartWave(int waveIndex)
     {
         currentWaveIndex = waveIndex;
+        
+        // BOSS TRIGGER
+        if (currentWaveIndex == bossWaveNumber)
+        {
+            StartBossBattle();
+            return;
+        }
+
         currentState = WaveState.Spawning;
+        isBossWave = false;
 
         // Reset Counters
         spawnedCount = 0;
@@ -115,6 +132,22 @@ public class WaveManager : MonoBehaviour
         currentMaxOnScreen = currentConfig.maxEnemiesOnScreen;
 
         Debug.Log($"Wave {currentWaveIndex} Started! Quota: {currentQuota}");
+    }
+
+    void StartBossBattle()
+    {
+        currentState = WaveState.BossBattle;
+        isBossWave = true;
+        
+        // Spawn Boss
+        Debug.Log("⚠️ WARNING: BOSS APPROACHING! ⚠️");
+        
+        if (bossPrefab != null)
+        {
+            // Spawn at default location (Entrance handled by BossController)
+            Instantiate(bossPrefab, new Vector3(0, 12, 0), Quaternion.identity);
+            enemiesOnScreen = 1; // Track boss
+        }
     }
 
     WaveRangeConfigSO GetConfigForWave(int wave)
@@ -192,11 +225,53 @@ public class WaveManager : MonoBehaviour
 
         if (enemiesOnScreen < 0) enemiesOnScreen = 0;
 
+        // BOSS DEATH CHECK
+        if (isBossWave && enemy is BossController)
+        {
+            HandleBossDefeated();
+            return;
+        }
+
         CheckWaveCompletion();
+    }
+
+    void HandleBossDefeated()
+    {
+        Debug.Log("🎉 BOSS DEFEATED! 🎉");
+        
+        // 1. Rewards
+        PlayerController player = FindFirstObjectByType<PlayerController>();
+        if (player != null)
+        {
+            // Full Heal
+            Health playerHealth = player.GetComponent<Health>();
+            if (playerHealth != null) playerHealth.HealPercent(1.0f);
+            
+            // Heat Reset
+            HeatSystem heat = player.GetComponent<HeatSystem>();
+            if (heat != null) heat.ReduceHeatPercent(1.0f);
+            
+            // Score Bonus
+            ScoreKeeper score = FindFirstObjectByType<ScoreKeeper>();
+            if (score != null) score.ModifyScore(2000);
+        }
+
+        // 2. Clear Minions?
+        Enemy[] remaining = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+        foreach(var e in remaining)
+        {
+            Destroy(e.gameObject); // Clean sweep
+        }
+
+        // 3. Complete Wave
+        StartCoroutine(WaveCompleteRoutine());
     }
 
     void CheckWaveCompletion()
     {
+        // Allow completion if Spawning OR Cleanup
+        if (currentState != WaveState.Spawning && currentState != WaveState.Cleanup) return;
+
         // Wave is done if we spawned everyone AND killed everyone
         if (spawnedCount >= currentQuota && killedCount >= currentQuota)
         {

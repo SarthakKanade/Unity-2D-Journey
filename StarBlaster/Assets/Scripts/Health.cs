@@ -14,6 +14,10 @@ public class Health : MonoBehaviour
     ScoreKeeper scoreKeeper;
     LevelManager levelManager;
 
+    // NEW: Events for UI and Boss Phases
+    public event System.Action<float> OnHealthChanged;
+
+
     void Awake()
     {
         maxHealth = health;
@@ -45,9 +49,11 @@ public class Health : MonoBehaviour
         }
     }
 
-    void TakeDamage(int damage)
+    public void TakeDamage(int damage)
     {
         health -= damage;
+        OnHealthChanged?.Invoke(GetHealthPercentage());
+        
         if (health <= 0)
         {
             Die();
@@ -91,7 +97,8 @@ public class Health : MonoBehaviour
     public void IncreaseMaxHealth(int amount)
     {
         maxHealth += amount;
-        health += amount; // Also heal the amount added? Usually yes for upgrades.
+        health += amount; 
+        OnHealthChanged?.Invoke(GetHealthPercentage());
     }
 
     public void HealPercent(float percent)
@@ -99,6 +106,7 @@ public class Health : MonoBehaviour
         int healAmount = Mathf.RoundToInt(maxHealth * percent);
         health += healAmount;
         health = Mathf.Min(health, maxHealth);
+        OnHealthChanged?.Invoke(GetHealthPercentage());
     }
 
     public float GetHealthPercentage()

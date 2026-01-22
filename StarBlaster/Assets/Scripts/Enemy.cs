@@ -18,7 +18,7 @@ public abstract class Enemy : MonoBehaviour
 
     // ...
 
-    void OnDestroy()
+    protected virtual void OnDestroy()
     {
        // Notify Manager
        OnEnemyDeath?.Invoke(this); 
@@ -169,12 +169,24 @@ public abstract class Enemy : MonoBehaviour
     }
     
     // Common Helper Methods
+    // Fair Aim Logic
+    protected bool isAimLocked = false;
+    [SerializeField] protected float turnSpeed = 180f; // degrees per second
+
+    public void LockAim(bool locked)
+    {
+        isAimLocked = locked;
+    }
+
     protected void FacePlayer()
     {
-        if (player == null) return;
+        if (player == null || isAimLocked) return; 
         
         Vector2 direction = player.transform.position - transform.position;
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-        transform.rotation = Quaternion.Euler(0, 0, angle);
+        float targetAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+        Quaternion targetRotation = Quaternion.Euler(0, 0, targetAngle);
+
+        // Smoothly rotate towards target
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
     }
 }

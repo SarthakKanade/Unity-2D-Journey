@@ -1281,13 +1281,13 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 300
+  m_Spacing: 50
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
   m_ChildControlHeight: 1
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
+  m_ChildScaleWidth: 1
+  m_ChildScaleHeight: 1
   m_ReverseArrangement: 0
 --- !u!1 &1286647409
 GameObject:
@@ -1741,10 +1741,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveManager
   rangeConfigs:
   - {fileID: 11400000, guid: 0e619ebbbd45c47b3805adb68084969c, type: 2}
+  - {fileID: 11400000, guid: 651716fe86a814cdd9274b0435f367e5, type: 2}
+  - {fileID: 11400000, guid: 725fe80600b184518a889e2ac8dd4f9e, type: 2}
+  - {fileID: 11400000, guid: ff848804bcd0e447ca46c0aca1994a7d, type: 2}
   initialWaveDelay: 2
   waveBreakTime: 3
+  startingWave: 10
+  bossPrefab: {fileID: 1307749719956638096, guid: e6a9eb46518974fbc885a7017a921868, type: 3}
+  bossWaveNumber: 10
   currentWaveIndex: 1
   currentState: 0
+  isBossWave: 0
   currentQuota: 0
   spawnedCount: 0
   killedCount: 0
