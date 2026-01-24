@@ -5,22 +5,29 @@ using UnityEngine;
 public class BossController : Enemy
 {
     [Header("Boss Config")]
-    [SerializeField] BossPhaseSO phase1Config;
-    [SerializeField] BossPhaseSO phase2Config;
-    [SerializeField] Transform[] firePoints; // 0 for Barrage, 1 for Laser?
-
+    [SerializeField] protected BossPhaseSO phase1Config;
+    [SerializeField] protected BossPhaseSO phase2Config;
+    
     [Header("State")]
-    [SerializeField] BossPhase currentPhase = BossPhase.Phase1;
-    BossPhaseSO currentConfig;
+    [SerializeField] protected BossPhase currentPhase = BossPhase.Phase1;
+    protected BossPhaseSO currentConfig;
 
-    // Attack Timers
-    float barrageTimer;
-    float laserTimer;
-    float spawnTimer;
+    [Header("Shared References")]
+    [SerializeField] protected LaserBeam laserBeam;
+
+    // Timers
+    protected float volleyTimer;
+    protected float pulseTimer;
+    protected float barrageTimer;
+    protected float laserTimer;
 
     // Movement
-    Vector2 startPos;
-    float timeAlive;
+    protected Vector2 startPos;
+    protected float timeAlive;
+
+    // Shared State
+    protected bool isAttacking = false;
+    protected float spawnTimer;
 
     public enum BossPhase { Phase1, Phase2 }
 
@@ -33,26 +40,23 @@ public class BossController : Enemy
     {
         base.Start();
         
-        // Listen to Health
         Health healthComp = GetComponent<Health>();
         if (healthComp != null)
         {
             healthComp.OnHealthChanged += HandleHealthChanged;
         }
 
-        // Start Entrance
         StartCoroutine(BossEntranceRoutine());
     }
 
-    IEnumerator BossEntranceRoutine()
+    protected virtual IEnumerator BossEntranceRoutine()
     {
         currentState = EnemyState.Entrance;
         
-        // Target: Top of Enemy Zone (Backline)
-        float targetY = 7f; // Default high
+        float targetY = 7f; 
         if (GameArea.Instance != null)
         {
-            targetY = GameArea.Instance.BacklineY - 1f; // Slightly below top edge
+            targetY = GameArea.Instance.BacklineY - 1f;
         }
 
         Vector3 targetPos = new Vector3(0, targetY, 0);
@@ -63,25 +67,22 @@ public class BossController : Enemy
             yield return null;
         }
         
-        // Arrived
         startPos = transform.position;
         EnterPhase(BossPhase.Phase1);
     }
 
     protected override void OnDestroy()
     {
-        base.OnDestroy(); // IMPORTANT: Notify WaveManager!
+        base.OnDestroy();
 
         Health healthComp = GetComponent<Health>();
         if (healthComp != null)
         {
             healthComp.OnHealthChanged -= HandleHealthChanged;
         }
-
-        // BOSS REWARD handled in WaveManager
     }
 
-    void HandleHealthChanged(float percent)
+    protected virtual void HandleHealthChanged(float percent)
     {
         if (currentPhase == BossPhase.Phase1 && percent <= 0.5f)
         {
@@ -89,21 +90,11 @@ public class BossController : Enemy
         }
     }
 
-    void EnterPhase(BossPhase phase)
+    protected virtual void EnterPhase(BossPhase phase)
     {
-        currentState = EnemyState.Attack; // UNFREEZE LOGIC
+        currentState = EnemyState.Attack;
         currentPhase = phase;
         currentConfig = (phase == BossPhase.Phase1) ? phase1Config : phase2Config;
-        
-        // Reset Timers? 
-        // Maybe keep them but clamp to new cooldowns so they don't instant fire
-        
-        Debug.Log($"BOSS ENTERING {phase}");
-
-        if (phase == BossPhase.Phase2)
-        {
-            // Flash / Sound
-        }
     }
 
     protected override void UpdateEnemyState()
@@ -113,127 +104,112 @@ public class BossController : Enemy
         MovePattern();
         HandleAttacks();
         
-        if (currentConfig.enableAdds)
+        if (currentConfig != null && currentConfig.enableAdds)
         {
             HandleSpawning();
         }
     }
 
-    void MovePattern()
+    protected virtual void MovePattern()
     {
-        // Drifts forward slowly + Sine wave X
-        // Y Position: Slowly move from Spawn (Back) towards Mid
-        // We shouldn't cross Player Line
-        
-        // For now, simpler Drift:
+        if (currentConfig == null) return;
         float newX = startPos.x + Mathf.Sin(timeAlive * currentConfig.flowSpeed) * currentConfig.driftAmplitude;
         
-        // Slow advance?
-        // float speed = (currentPhase == BossPhase.Phase2) ? 0.3f : 0.2f;
-        // transform.Translate(Vector3.down * speed * Time.deltaTime);
-        
-        // Just Clamp X
         Vector3 pos = transform.position;
         pos.x = newX;
         transform.position = pos;
     }
     
-    // Override Start to capture startPos after Entrance
     protected override void HandlePathComplete()
     {
         startPos = transform.position;
         base.HandlePathComplete();
     }
 
-    bool isAttacking = false;
-
-    void HandleAttacks()
+    protected virtual void HandleAttacks()
     {
-        if (player == null || isAttacking) return; // Block new attacks
-
-        barrageTimer += Time.deltaTime;
-        laserTimer += Time.deltaTime;
-
-        // Prioritize Laser if both ready? Or random?
-        // Let's prioritize Laser because it has a longer cooldown
-        if (laserTimer >= currentConfig.laserCooldown)
-        {
-            StartCoroutine(FireSweepLaser());
-            laserTimer = 0;
-            return;
-        }
-
-        if (barrageTimer >= currentConfig.barrageCooldown)
-        {
-            StartCoroutine(FireArcBarrage());
-            barrageTimer = 0;
-        }
+        // Override in Subclasses (Sentinel, Aegis)
     }
 
-    void HandleSpawning()
+    protected virtual void HandleSpawning()
     {
-        // RULES:
-        // 1. Never spawn while attacking (Laser/Barrage active)
-        if (isAttacking) 
-        {
-            // Debug.Log("BOSS SPAWN BLOCKED: Attacking"); // Uncomment if curious
-            return;
-        }
+        if (isAttacking || currentConfig == null) return;
 
         spawnTimer += Time.deltaTime;
-        
-        // Debug every second to ensure timer is running
-        // if (Time.frameCount % 60 == 0) Debug.Log($"BOSS SPAWN TIMER: {spawnTimer}/{currentConfig.spawnInterval}");
-
         if (spawnTimer >= currentConfig.spawnInterval)
         {
-            // 2. Cap Boss Adds
-            int currentAddCount = CountActiveAdds();
-            Debug.Log($"BOSS ATTEMPT SPAWN: Timer Ready. Adds Active: {currentAddCount}/{currentConfig.maxAddsAlive}");
-            
-            if (currentAddCount < currentConfig.maxAddsAlive)
+            if (currentConfig.complexAdds != null && currentConfig.complexAdds.Count > 0)
             {
-                StartCoroutine(SpawnAddAtEdge());
+                SpawnComplexAdd();
             }
             else
             {
-                Debug.Log("BOSS SPAWN SKIPPED: Max Adds Reached.");
+                int currentAddCount = CountActiveAdds(null); 
+                if (currentAddCount < currentConfig.maxAddsAlive)
+                {
+                    StartCoroutine(SpawnAddAtEdge(currentConfig.addsPrefab));
+                }
             }
             spawnTimer = 0;
         }
     }
 
-    int CountActiveAdds()
+    protected void SpawnComplexAdd()
     {
-        // Simple tag check or counting Component
-        // Since we only have Boss and Adds, counts all enemies except self
+        int totalAdds = CountActiveAdds(null);
+        if (totalAdds >= currentConfig.maxAddsAlive) return;
+
+        List<BossPhaseSO.AddConfig> candidates = new List<BossPhaseSO.AddConfig>();
+        foreach(var cfg in currentConfig.complexAdds)
+        {
+            int typeCount = CountActiveAdds(cfg.prefab);
+            if (typeCount < cfg.maxCount)
+            {
+                candidates.Add(cfg);
+            }
+        }
+
+        if (candidates.Count == 0) return;
+        var chosen = candidates[Random.Range(0, candidates.Count)];
+        StartCoroutine(SpawnAddAtEdge(chosen.prefab));
+    }
+
+    protected int CountActiveAdds(GameObject specificPrefab)
+    {
         Enemy[] allEnemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
         int count = 0;
         foreach(var e in allEnemies)
         {
-            if (e != this) count++;
+            if (e == this) continue;
+            
+            if (specificPrefab == null) 
+            {
+                count++;
+            }
+            else
+            {
+                 if (e.name.Contains(specificPrefab.name))
+                 {
+                     count++;
+                 }
+            }
         }
         return count;
     }
 
-    IEnumerator SpawnAddAtEdge()
+    protected IEnumerator SpawnAddAtEdge(GameObject prefabToSpawn)
     {
-        if (currentConfig.addsPrefab == null) yield break;
+        if (prefabToSpawn == null) yield break;
 
-        // 3. Edge Spawning
-        // Left (-X) or Right (+X)
-        // Y: Random height in Enemy Zone
         bool leftSide = Random.value > 0.5f;
         float spawnX = 0f;
-        float spawnY = 6f; // Fallback
+        float spawnY = 6f; 
 
         if (GameArea.Instance != null)
         {
             float padding = 1.0f;
             spawnX = leftSide ? GameArea.Instance.MinBounds.x + padding 
                               : GameArea.Instance.MaxBounds.x - padding;
-            
-            // Random Y in Mid/Front
             spawnY = Random.Range(GameArea.Instance.FrontlineY, GameArea.Instance.BacklineY);
         }
         else
@@ -242,24 +218,48 @@ public class BossController : Enemy
         }
 
         Vector2 spawnPos = new Vector2(spawnX, spawnY);
-
-        Instantiate(currentConfig.addsPrefab, spawnPos, Quaternion.Euler(0,0,180));
-        
-        Debug.Log($"BOSS: Spawning Add at {spawnPos}");
+        Instantiate(prefabToSpawn, spawnPos, Quaternion.Euler(0,0,180));
         yield return null;
     }
 
+    protected IEnumerator FireSweepLaser()
+    {
+        isAttacking = true;
 
-    [Header("Laser Reference")]
-    [SerializeField] LaserBeam laserBeam;
+        if (laserBeam == null) 
+        {
+            Debug.LogError($"BOSS ERROR: LaserBeam reference is MISSING on {name}!");
+            isAttacking = false;
+            yield break;
+        }
 
-    // --- ATTACKS ---
+        // Setup Damage
+        laserBeam.Setup(currentConfig.laserDamagePerSec);
 
-    IEnumerator FireArcBarrage()
+        // Start Visuals (Warning Line appears NOW)
+        StartCoroutine(laserBeam.FireRoutine(1.2f, currentConfig.laserDuration));
+
+        // Sync Lock Logic:
+        // 1. Tracking Phase (0.8s) - Warning line moves with boss
+        yield return new WaitForSeconds(0.8f);
+
+        // 2. Lock Aim (0.4s before fire) - Final commitment
+        LockAim(true);
+        yield return new WaitForSeconds(0.4f);
+
+        // 3. Fire Phase (Laser is active now)
+        // Keep locked while firing + small buffer to ensure visuals are gone
+        yield return new WaitForSeconds(currentConfig.laserDuration + 0.25f);
+        
+        // 4. Unlock
+        LockAim(false);
+        isAttacking = false;
+    }
+
+    protected IEnumerator FireArcBarrage()
     {
         isAttacking = true;
         
-        // Visual Telegraph
         if (currentConfig.projectilePrefab == null)
         {
             isAttacking = false;
@@ -304,45 +304,7 @@ public class BossController : Enemy
             Destroy(bullet, 5f);
         }
         
-        Debug.Log("BOSS: Arc Barrage Fired!");
-        
         // 2. UNLOCK AIM
-        LockAim(false);
-        isAttacking = false;
-    }
-
-    IEnumerator FireSweepLaser()
-    {
-        isAttacking = true;
-
-        if (laserBeam == null) 
-        {
-            Debug.LogError("BOSS ERROR: LaserBeam reference is MISSING in Inspector!");
-            isAttacking = false;
-            yield break;
-        }
-
-        // Setup Damage
-        laserBeam.Setup(currentConfig.laserDamagePerSec);
-
-        // Start Visuals (Warning Line appears NOW)
-        StartCoroutine(laserBeam.FireRoutine(1.2f, currentConfig.laserDuration));
-
-        // Sync Lock Logic:
-        // 1. Tracking Phase (0.8s) - Warning line moves with boss
-        yield return new WaitForSeconds(0.8f);
-
-        // 2. Lock Aim (0.4s before fire) - Final commitment
-        LockAim(true);
-        yield return new WaitForSeconds(0.4f);
-
-        // 3. Fire Phase (Laser is active now)
-        // Keep locked while firing + small buffer to ensure visuals are gone
-        yield return new WaitForSeconds(currentConfig.laserDuration + 0.25f);
-        
-        Debug.Log("BOSS: Sweep Laser Channeling...");
-        
-        // 4. Unlock
         LockAim(false);
         isAttacking = false;
     }

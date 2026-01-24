@@ -49,8 +49,22 @@ public class Health : MonoBehaviour
         }
     }
 
+    // NEW: Shield Support
+    public BossShield activeShield;
+
+    public void RegisterShield(BossShield shield)
+    {
+        activeShield = shield;
+    }
+
     public void TakeDamage(int damage)
     {
+        // 1. Process Shield Logic first
+        if (activeShield != null && activeShield.IsActive)
+        {
+            damage = activeShield.ProcessDamage(damage);
+        }
+
         health -= damage;
         OnHealthChanged?.Invoke(GetHealthPercentage());
         

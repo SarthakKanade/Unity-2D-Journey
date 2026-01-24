@@ -15,7 +15,9 @@ public class WaveManager : MonoBehaviour
 
     [Header("Boss Settings")]
     [SerializeField] GameObject bossPrefab;
+    [SerializeField] GameObject boss2Prefab;
     [SerializeField] int bossWaveNumber = 10;
+    [SerializeField] int boss2WaveNumber = 20;
     
     [Header("Debug / Read-Only")]
     [SerializeField] int currentWaveIndex = 1;
@@ -42,7 +44,7 @@ public class WaveManager : MonoBehaviour
     {
         WaitingToStart,
         Spawning,
-        BossBattle, // NEW
+        BossBattle, 
         Cleanup,
         WaveComplete,
         GameOver
@@ -104,8 +106,13 @@ public class WaveManager : MonoBehaviour
         // BOSS TRIGGER
         if (currentWaveIndex == bossWaveNumber)
         {
-            StartBossBattle();
+            StartBossBattle(bossPrefab);
             return;
+        }
+        if (currentWaveIndex == boss2WaveNumber)
+        {
+             StartBossBattle(boss2Prefab);
+             return;
         }
 
         currentState = WaveState.Spawning;
@@ -134,7 +141,7 @@ public class WaveManager : MonoBehaviour
         Debug.Log($"Wave {currentWaveIndex} Started! Quota: {currentQuota}");
     }
 
-    void StartBossBattle()
+    void StartBossBattle(GameObject prefabToSpawn)
     {
         currentState = WaveState.BossBattle;
         isBossWave = true;
@@ -142,10 +149,10 @@ public class WaveManager : MonoBehaviour
         // Spawn Boss
         Debug.Log("⚠️ WARNING: BOSS APPROACHING! ⚠️");
         
-        if (bossPrefab != null)
+        if (prefabToSpawn != null)
         {
             // Spawn at default location (Entrance handled by BossController)
-            Instantiate(bossPrefab, new Vector3(0, 12, 0), Quaternion.identity);
+            Instantiate(prefabToSpawn, new Vector3(0, 12, 0), Quaternion.identity);
             enemiesOnScreen = 1; // Track boss
         }
     }

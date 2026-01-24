@@ -22,6 +22,15 @@ public class PlayerController : MonoBehaviour
     Vector2 maxBounds;
     Vector2 mousePosition;
 
+    // Knockback
+    Vector2 knockbackVelocity;
+    [SerializeField] float knockbackDecay = 5f;
+
+    public void ApplyKnockback(Vector2 force)
+    {
+        knockbackVelocity += force;
+    }
+
     void Awake()
     {
         if (rb == null) rb = GetComponent<Rigidbody2D>();
@@ -87,10 +96,15 @@ public class PlayerController : MonoBehaviour
 
     void ProcessMovement()
     {
-        Vector2 currentPos = rb.position;
-        Vector2 displacement = moveInput * moveSpeed * Time.fixedDeltaTime;
+        // 1. Handle Knockback Decay
+        knockbackVelocity = Vector2.Lerp(knockbackVelocity, Vector2.zero, knockbackDecay * Time.fixedDeltaTime);
         
-        Vector2 targetPos = currentPos + displacement;
+        Vector2 currentPos = rb.position;
+        
+        // 2. Combine Input + Knockback
+        Vector2 displacement = (moveInput * moveSpeed) + knockbackVelocity;
+        
+        Vector2 targetPos = currentPos + (displacement * Time.fixedDeltaTime);
 
         targetPos.x = Mathf.Clamp(targetPos.x, minBounds.x + padding, maxBounds.x - padding);
         targetPos.y = Mathf.Clamp(targetPos.y, minBounds.y + padding, maxBounds.y - padding);

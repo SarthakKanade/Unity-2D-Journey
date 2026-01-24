@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [CreateAssetMenu(menuName = "StarBlaster/Boss Phase Config", fileName = "NewBossPhase")]
 public class BossPhaseSO : ScriptableObject
@@ -24,9 +25,34 @@ public class BossPhaseSO : ScriptableObject
     [Header("Visuals")]
     public Color phaseColor = Color.white;
     
+    [Header("Targeted Volley (Boss 2)")]
+    public float targetedVolleyCooldown = 4.5f;
+    public int targetedVolleyCount = 3;
+    public float targetedVolleySpeed = 12f;
+
+    [Header("Shield Pulse (Boss 2)")]
+    public float pulseInterval = 5f;
+    public int pulseDamage = 10;
+    public float pulsePushForce = 5f;
+    
+    [Header("Shield Logic")]
+    public int shieldHealth = 0; // If > 0, Shield Active
+
     [Header("Spawning (Phase 2)")]
     public bool enableAdds = false;
     public float spawnInterval = 12f;
-    public int maxAddsAlive = 2; // Default for Phase 1
+    public int maxAddsAlive = 2; 
     public GameObject addsPrefab;
+    
+    // Complex Adds Support
+    [Header("Complex Spawning")]
+    public List<AddConfig> complexAdds;
+
+    [System.Serializable]
+    public struct AddConfig
+    {
+        public GameObject prefab;
+        public int maxCount;
+        public float spawnWeight;
+    }
 }

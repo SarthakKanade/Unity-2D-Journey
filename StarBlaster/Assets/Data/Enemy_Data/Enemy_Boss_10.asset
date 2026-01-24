@@ -16,7 +16,7 @@ MonoBehaviour:
   scoreValue: 100
   moveSpeed: 5
   preferredPath: 0
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 2783788306037018308, guid: 7bf7bade81d834a77b285811f857c35e, type: 3}
   damage: 10
   projectileSpeed: 10
   fireRate: 0.5
