@@ -4,13 +4,13 @@ public class PowerupManager : MonoBehaviour
 {
     [SerializeField] PowerupSO powerup;
 
-    PlayerController player;
+    PlayerStateMachine player;
     SpriteRenderer spriteRenderer;
     float timeLeft;
 
     void Start()
     {
-        player = FindFirstObjectByType<PlayerController>();
+        player = FindFirstObjectByType<PlayerStateMachine>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         timeLeft = powerup.GetTime();
     }
@@ -30,7 +30,7 @@ public class PowerupManager : MonoBehaviour
 
                 if (timeLeft <= 0)
                 {
-                    player.DeactivatePowerup(powerup);
+                    DeactivatePowerup();
                 }
             }
         }
@@ -43,7 +43,31 @@ public class PowerupManager : MonoBehaviour
         if (collision.gameObject.layer == layerIndex && spriteRenderer.enabled)
         {
             spriteRenderer.enabled = false;
-            player.ActivatePowerup(powerup);
+            ActivatePowerup();
+        }
+    }
+
+    private void ActivatePowerup()
+    {
+        if (powerup.GetPowerupType() == "speed")
+        {
+            player.ApplySpeedModifier(powerup.GetValueChange());
+        }
+        else if (powerup.GetPowerupType() == "torque")
+        {
+            player.ApplyTorqueModifier(powerup.GetValueChange());
+        }
+    }
+
+    private void DeactivatePowerup() 
+    {
+        if (powerup.GetPowerupType() == "speed")
+        {
+            player.ApplySpeedModifier(-powerup.GetValueChange());
+        }
+        else if (powerup.GetPowerupType() == "torque")
+        {
+            player.ApplyTorqueModifier(-powerup.GetValueChange());
         }
     }
 }

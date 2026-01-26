@@ -8,7 +8,17 @@ public class ScoreManager : MonoBehaviour
 
     int score = 0;
 
-    public void AddScore(int additionalScore)
+    void OnEnable()
+    {
+        GameEvents.OnScoreGained += AddScore;
+    }
+
+    void OnDisable()
+    {
+        GameEvents.OnScoreGained -= AddScore;
+    }
+
+    private void AddScore(int additionalScore)
     {
         score += additionalScore;
         scoreText.text = "Score: " + score;
